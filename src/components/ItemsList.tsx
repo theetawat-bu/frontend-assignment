@@ -1,38 +1,43 @@
 "use client";
-import data from "@/data/data";
+import data, { dataProps } from "@/data/data";
 import React, { useEffect } from "react";
-import Carditem from "./Card/Carditem";
+import CardItem from "./Card/Carditem";
 import useSelectedItem from "@/store/selectedItemStore";
+import { INTERVAL_TIME_MILLISECOND } from "@/config/constants";
 
 const ItemsList = () => {
   const selectedItems = useSelectedItem((state) => state.selectedItems);
   const removeLast = useSelectedItem((state) => state.removeFirst);
+
   useEffect(() => {
     if (selectedItems.length != 0) {
-      const inter = setInterval(() => {
+      const interVal = setInterval(() => {
         if (selectedItems) {
-          console.log(selectedItems);
           removeLast();
         }
-      }, 2000);
-      return () => clearInterval(inter);
+      }, INTERVAL_TIME_MILLISECOND);
+      return () => clearInterval(interVal);
     }
   }, [selectedItems.length != 0]);
+
+
+  function filterListData(data:dataProps) {
+    const result = selectedItems.find(
+      (v) => v.name == data.name && v.type == data.type
+    );
+    if (result) {
+      // ถ้าข้อมูลถูกเลือกแล้วไม่ต้องแสดงฝั่งซ้ายสุด
+      return false;
+    }
+    return true;
+  }
   return (
-    <div className=" w-[30%]">
-      <ul className="">
+    <div className=" w-[35%]">
+      <ul>
         {data
-          .filter((data) => {
-            const result = selectedItems.find(
-              (v) => v.name == data.name && v.type == data.type
-            );
-            if (result) {
-              return false;
-            }
-            return true;
-          })
+          .filter(filterListData)
           .map((data) => {
-            return <Carditem key={data.name} data={data} mode="add" />;
+            return <CardItem key={data.name} data={data} mode="add" />;
           })}
       </ul>
     </div>
